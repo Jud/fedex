@@ -16,6 +16,7 @@ module Fedex
             rate_details = [rate_reply[:rated_shipment_details]].flatten.first[:shipment_rate_detail]
             rate_details.merge!(service_type: rate_reply[:service_type])
             rate_details.merge!(transit_time: rate_reply[:transit_time])
+            rate_details.merge!(delivery_timestamp: rate_reply[:delivery_timestamp])
             Fedex::Rate.new(rate_details)
           end
         else
@@ -33,6 +34,7 @@ module Fedex
       # Add information for shipments
       def add_requested_shipment(xml)
         xml.RequestedShipment{
+          xml.ShipTimestamp @shipping_options[:ship_timestamp] ? @shipping_options[:ship_timestamp].utc.iso8601(2) : Time.now.utc.iso8601(2)
           xml.DropoffType @shipping_options[:drop_off_type] ||= "REGULAR_PICKUP"
           xml.ServiceType service_type if service_type
           xml.PackagingType @shipping_options[:packaging_type] ||= "YOUR_PACKAGING"
